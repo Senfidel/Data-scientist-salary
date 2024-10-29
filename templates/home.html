@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Scientist Salary Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h1>Data Scientist Salary Prediction</h1>
+        <form action="/score" method="post">
+            <div class="mb-3">
+                <label for="work_year" class="form-label">Work Year:</label>
+                <input type="text" class="form-control" id="work_year" name="work_year" placeholder="2024" required>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="salary_currency"  class="form-label">Salary Currency:</label>
+                <input type="text" class="form-control" id="salary_currency"name="salary_currency"  placeholder="USD" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="experience_level" class="form-label">Experience Level:</label>
+                <input type="text" class="form-control" id="experience_level"name="experience_level"  placeholder="Senior, Intermédiaire , Cadre, Débutant" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="job_title" class="form-label">Job Title:</label>
+                <input type="text" class="form-control" id="job_title" name="job_title" placeholder="AI Engineer" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="employee_residence" class="form-label">Employee Residence:</label>
+                <input type="text" class="form-control" id="employee_residence" name="employee_residence" placeholder="France" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="remote_ratio" class="form-label">Remote Ratio:</label>
+                <input type="number" class="form-control" id="remote_ratio" name="remote_ratio" placeholder="0-100" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="company_location" class="form-label">Company Location:</label>
+                <input type="text" class="form-control" id="company_location" name="company_location"placeholder="France" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="company_size" class="form-label">Company Size:</label>
+                <input type="text" class="form-control" id="company_size" name="company_size"placeholder="Plus de 250 employés, 50 à 250 employés, Moins de 50 employés" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="employment_type" class="form-label">Employment Type:</label>
+                <input type="text" class="form-control" id="employment_type"name="employment_type"placeholder="Temps Plein, Contrat, Temps Partiel, Freelance" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Predict</button>
+        </form>
+
+        <br><br>
+
+        <div id="prediction_text">
+            {{ prediction_text }}
+        </div>
+    </div>
+
+    <!-- Scripts jQuery et jQuery UI -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Modalités pour le champ "job_title"
+            const jobTitles = [
+                'AI Engineer', 'Machine Learning Engineer', 'Business Intelligence Developer', 'Data Engineer',
+                'Data Scientist', 'Cloud Database Engineer', 'Research Engineer', 'Data Analyst',
+                // Liste complète des titres
+                'Principal Data Architect', 'Data Analytics Engineer', 'Cloud Data Architect', 'Lead Data Engineer',
+                'Principal Data Analyst'
+            ];
+
+            // Activer l'autocomplétion pour le champ "job_title"
+            $("#job_title").autocomplete({
+                source: jobTitles,
+                minLength: 2  // Activer l'autocomplétion après la saisie de 2 caractères
+            });
+
+            // Modalités pour le champ "work_year"
+            const workYears = [2024, 2023, 2022, 2021, 2020];
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#work_year").autocomplete({
+                source: workYears.map(String),  // Convertir les nombres en chaînes de caractères
+                minLength: 2  // Autocomplétion dès le premier caractère
+            });
+
+                        // Modalités pour le champ "work_year"
+            const salaryCurrency = ['USD','EUR', 'GBP','CHF','CAD','NZD','AUD', 'INR','PLN','BRL','PHP','TRY','NOK','JPY','ZAR','HKD','SGD','ILS','THB','HUF','DKK','MXN', 'CLP'];
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#salary_currency").autocomplete({
+                source: salaryCurrency,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+            // Modalités pour le champ "work_year"
+            const experienceLevel = ['Senior', 'Intermédiaire', 'Débutant', 'Cadre']
+            ;
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#experience_level").autocomplete({
+                source: experienceLevel,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+
+
+            // Modalités pour le champ "work_year"
+            const employeeResidence = ['United Arab Emirates','United States','Australia','Ukraine',
+                                        'Lithuania','Canada','United Kingdom','Netherlands','Egypt','Austria',
+                                        'Germany','Spain','Philippines','Finland','Türkiye','Switzerland','Oman',
+                                        'New Zealand','France','Mexico','Portugal','Bosnia and Herzegovina','Brazil',
+                                        'Argentina','Latvia','South Africa','Italy','India','Ireland','Estonia',
+                                        'Malta','Croatia','Lebanon','Romania','Hungary','Viet Nam','Nigeria','Poland',
+                                        'Czechia','Pakistan','Uganda','Colombia','Slovenia','Greece','Mauritius','Armenia',
+                                        'Thailand','Korea, Republic of','Qatar','Russian Federation','Kenya','Tunisia','Ghana',
+                                        'Belgium','Andorra','Ecuador', 'Peru','Moldova, Republic of','Saudi Arabia',
+                                        'Norway','Uzbekistan', 'Georgia','Japan','Hong Kong', 'Central African Republic','Israel',
+                                        'Singapore', 'Sweden', 'Kuwait','Cyprus', 'Iran, Islamic Republic of',
+                                        'American Samoa','China', 'Costa Rica','Chile','Puerto Rico','Denmark',
+                                        'Bolivia, Plurinational State of','Dominican Republic','Indonesia','Malaysia','Honduras','Algeria',
+                                        'Iraq', 'Bulgaria','Jersey', 'Serbia','Luxembourg'];
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#employee_residence").autocomplete({
+                source: employeeResidence,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+
+            // Modalités pour le champ "work_year"
+            const companyLocation = ['United Arab Emirates','United States','Australia',
+                                    'Ukraine', 'Lithuania','Canada','United Kingdom','Netherlands','Egypt','Austria','Germany',
+                                    'Spain','Philippines','Finland','Türkiye','Switzerland','Oman','New Zealand',
+                                    'France','Mexico','Portugal','Bosnia and Herzegovina','Brazil','Argentina','Latvia','South Africa',
+                                    'Italy', 'American Samoa','Ireland','Estonia','India','Malta',
+                                    'Hungary','Lebanon','Romania','Viet Nam','Nigeria','Poland','Luxembourg',
+                                    'Gibraltar','Colombia', 'Slovenia','Greece','Mauritius','Russian Federation',
+                                    'Korea, Republic of','Czechia','Qatar','Kenya','Denmark','Ghana',
+                                    'Sweden','Andorra','Ecuador','Israel','Saudi Arabia', 'Norway', 'Japan',
+                                    'Hong Kong', 'Central African Republic','Singapore', 'Thailand', 'Croatia',
+                                    'Armenia', 'Pakistan', 'Iran, Islamic Republic of','Bahamas','Puerto Rico',
+                                    'Belgium','Indonesia','Malaysia','Honduras','Algeria','Iraq','China','Chile','Moldova, Republic of']
+                                                ;
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#company_location").autocomplete({
+                source: companyLocation,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+            // Modalités pour le champ "work_year"
+            const companySize = ['Plus de 250 employés', '50 à 250 employés', 'Moins de 50 employés']
+            ;
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#company_size").autocomplete({
+                source: companySize,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+            // Modalités pour le champ "work_year"
+            const employmentType = ['Temps Plein', 'Contrat', 'Temps Partiel', 'Freelance']
+
+            ;
+
+            // Activer l'autocomplétion pour le champ "work_year"
+            $("#employment_type").autocomplete({
+                source: employmentType,  // Convertir les nombres en chaînes de caractères
+                minLength: 1  // Autocomplétion dès le premier caractère
+            });
+
+        });
+    </script>
+</body>
+</html>
